@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Comentários e presentes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.lineicons.com/2.0/LineIcons.css" rel="stylesheet">
+    <style type="text/css">
+      .form-group,
+      .btn {
+        background-color: #f8f9fa;
+        border-color: #f8f9fa;
+        color: #495057;
+        margin-top: 20px;
+      }
+
+      .form-group label {
+        font-weight: bold;
+      }
+
+      .btn:hover {
+        box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .chat-list,
+      .gift-list {
+        overflow-y: scroll;
+        max-height: 200px;
+        background-color: #f8f9fa;
+        margin-top: 20px;
+      }
+
+      .chat-list li,
+      .gift-list li {
+        word-break: break-all;
+      }
+
+      .gift-icon {
+        font-size: 1.25rem;
+        color: #FFD700;
+      }
+
+      .gift-icon:hover {
+        transform: rotate(10deg);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container my-4">
+      <h1 class="text-center">Análise do TK</h1>
+      <div class="row">
+        <div class="col-md-6 mx-auto">
+          <form action="#" method="">
+
+            <div class="form-group">
+                <label for="comentario-usuario">Seu nome:</label>
+                <input type="text" id="comentario-usuario" name="comentario-usuario" class="form-control" readonly>
+              </div>  
+
+            <div class="form-group">
+              <label for="comentario-recebido">Nome completo e idade:</label>
+              <input type="text" id="comentario-recebido" name="comentario-recebido" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="frase-de-amor">Sua frase de Amor:</label>
+              <input type="text" id="frase-de-amor" name="frase-de-amor" class="form-control" readonly>
+            </div>
+          </form>
+
+          <div class="row">
+            <div class="col-md-6">
+              <h2>Comentários&nbsp;<i class="lni lni-comments"></i></h2>
+              <ul id="chat" class="chat-list"></ul>
+            </div>
+
+            <div class="col-md-6">
+              <h2>Presentes&nbsp;<i class="lni lni-gift"></i></h2>
+              <ul id="gifts" class="gift-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+        // Conecta ao servidor com Socket.io
+        var socket = io();
+
+         // Ao receber um comentário, adiciona na lista de comentários e no input correspondente
+         socket.on('comment', function(data) {
+        var item = document.createElement('li');
+        item.textContent = `${data.uniqueId} escreve: ${data.comment}`;
+        document.getElementById('chat').appendChild(item);
+        document.getElementById('comentario-recebido').value = data.comment;
+      });
+
+          // Ao receber um comentário, adiciona no input correspondente de usuario
+          socket.on('comment', function(data) {
+        var item = document.createElement('li');
+        item.textContent = `${data.uniqueId} (id:${data.userId}) escreve: ${data.comment}`;
+        document.getElementById('chat').appendChild(item);
+        document.getElementById('comentario-usuario').value = data.comment
+        document.getElementById('comentario-usuario').value = data.uniqueId;
+
+
+      });
+  
+      // Array de frases de amor
+      const frasesDeAmor = [
+      "Nunca desista dos seus sonhos",
+        "O sucesso é uma jornada, não um destino",
+        "Cada obstáculo é uma oportunidade para crescer",
+        "Acredite em si mesmo(a) e no seu potencial",
+        ];
+  
+      // Função para escolher uma frase aleatória
+      function escolherFraseAleatoria() {
+        const indiceAleatorio = Math.floor(Math.random() * frasesDeAmor.length);
+        return frasesDeAmor[indiceAleatorio];
+      }
+  
+      socket.on('comment', function(data) {
+  var item = document.createElement('li');
+  item.textContent = `${data.uniqueId} (id:${data.userId}) escreve: ${data.comment}`;
+  document.getElementById('chat').appendChild(item);
+  document.getElementById('comentario-recebido').value = data.comment;
+
+  // Adiciona a frase de amor ao input correspondente
+  const fraseAleatoria = escolherFraseAleatoria();
+  document.getElementById('frase-de-amor').value = fraseAleatoria;
+
+
+});
+
+      // Ao receber um presente, adiciona na lista de presentes
+      socket.on('gift', function(data) {
+        console.log('dados teste', data)
+        var item = document.createElement('li');
+        item.innerHTML = `<i class="lni lni-gift gift-icon"></i>&nbsp;${data.uniqueId} enviou um presente: ${data.giftId}`;
+        document.getElementById('gifts').appendChild(item);
+      });
+
+            // Função para ler o texto em voz alta
+        function lerComentario() {
+        var comentario = document.getElementById('comentario-recebido').value;
+        var utterance = new SpeechSynthesisUtterance(comentario);
+        window.speechSynthesis.speak(utterance);
+        }
+
+        // Configuração para ler o texto em voz alta automaticamente a cada novo comentário recebido
+        socket.on('comment', function(data) {
+        var item = document.createElement('li');
+        item.textContent = `${data.uniqueId} escreve: ${data.comment}`;
+        document.getElementById('chat').appendChild(item);
+        document.getElementById('comentario-recebido').value = data.comment;
+
+        // Lê o novo comentário em voz alta
+        lerComentario();
+        });
+
+    </script>
+    
+</body>
+</html>
